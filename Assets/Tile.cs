@@ -6,46 +6,59 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    [SerializeField] private Sprite tileFaceCovered;
+    [SerializeField] private Sprite tileFaceBare;
+    [SerializeField] private Sprite bombSprite;
+    
     private SpriteRenderer _spriteRenderer;
-    public int TileRow;
-    public int TileColumn;
-    public bool HasBomb;
-    public int AdjacentBombAmount;
-    public TextMeshPro tileText;
+    private int _tileRow;
+    private int _tileColumn;
+    public bool HasBomb{ get; private set; }
+    public int AdjacentBombAmount { get; private set; }
+    private TextMeshPro _tileText;
+    public bool WasUncovered { get; private set; }
+    public static event Action<Tile> TileWasClicked;
 
     private void Start()
     {
-       
-        
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteRenderer.sprite = tileFaceCovered;
     }
 
-    public void SetTileText()
-    {
-        tileText = GetComponentInChildren<TextMeshPro>();
-        
-        if (HasBomb)
-            tileText.text = "!";
-        else if (AdjacentBombAmount == 0)
-            tileText.text = " ";
-        else
-            tileText.text = AdjacentBombAmount.ToString();
-    }
-
-    public void SetPosition(int row, int column)
-    {
-        TileRow =row;
-        TileColumn = column;
-    }
-    
     private void OnMouseUpAsButton()
     {
-        Debug.Log("clicked tile ");
+        if (TileWasClicked != null)
+            TileWasClicked.Invoke(this);
     }
 
-    public void UpdateColor(Color color)
+    public void UncoverTile()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _spriteRenderer.color = color;
+        _spriteRenderer.sprite = tileFaceBare;
+        WasUncovered = true;
+        
+        _tileText = GetComponentInChildren<TextMeshPro>();
+        if (HasBomb)
+        {
+            _tileText.text = " ";
+            _spriteRenderer.sprite = bombSprite;
+        }
+            
+        else if (AdjacentBombAmount == 0)
+            _tileText.text = " ";
+        
+        else
+            _tileText.text = AdjacentBombAmount.ToString();
+    }
+    
+    public void SetPosition(int row, int column)
+    {
+        _tileRow =row;
+        _tileColumn = column;
+    }
+    
+    public void SetBomb()
+    {
+        HasBomb = true;
     }
 
     public void DetermineAdjacentBombs()
@@ -59,21 +72,21 @@ public class Tile : MonoBehaviour
             if (!tileComponent.HasBomb)
                 continue;
             
-            if (tileComponent.TileRow == TileRow && tileComponent.TileColumn == TileColumn - 1)
+            if (tileComponent._tileRow == _tileRow && tileComponent._tileColumn == _tileColumn - 1)
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow && tileComponent.TileColumn == TileColumn+1)
+            if (tileComponent._tileRow == _tileRow && tileComponent._tileColumn == _tileColumn+1)
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow-1 && tileComponent.TileColumn == TileColumn)
+            if (tileComponent._tileRow == _tileRow-1 && tileComponent._tileColumn == _tileColumn)
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow -1 && tileComponent.TileColumn == TileColumn-1)
+            if (tileComponent._tileRow == _tileRow -1 && tileComponent._tileColumn == _tileColumn-1)
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow -1 && tileComponent.TileColumn == TileColumn+1)
+            if (tileComponent._tileRow == _tileRow -1 && tileComponent._tileColumn == _tileColumn+1)
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow +1 && tileComponent.TileColumn == TileColumn)
+            if (tileComponent._tileRow == _tileRow +1 && tileComponent._tileColumn == _tileColumn)
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow +1 && tileComponent.TileColumn == TileColumn-1) 
+            if (tileComponent._tileRow == _tileRow +1 && tileComponent._tileColumn == _tileColumn-1) 
                 AdjacentBombAmount++;
-            if (tileComponent.TileRow == TileRow +1 && tileComponent.TileColumn == TileColumn+1)
+            if (tileComponent._tileRow == _tileRow +1 && tileComponent._tileColumn == _tileColumn+1)
                 AdjacentBombAmount++;
         }
     }

@@ -9,11 +9,11 @@ using Random = UnityEngine.Random;
 public class GameGrid : MonoBehaviour
 {
     [SerializeField] private GameObject tileAsset;
-    public static float ScreenHeight { get; private set; }
-    public static float ScreenWidth { get; private set; }
+    private static float ScreenHeight { get; set; }
+    private static float ScreenWidth { get; set; }
     private Camera _cam;
 
-    public static List<GameObject> GameTiles = new List<GameObject>();
+    public static readonly List<GameObject> GameTiles = new List<GameObject>();
     
     private int[,] _gameGrid;
 
@@ -23,9 +23,8 @@ public class GameGrid : MonoBehaviour
         GetScreenSize(); 
         SetCameraPos();
         DrawGrid();
-        BombPicker.PickBombTiles();
+        PickBombTiles();
         RunAdjacentFinder();
-        SetTileTexts();
     }
 
     private void GetScreenSize()
@@ -45,7 +44,6 @@ public class GameGrid : MonoBehaviour
         
         float xOffset = (float)GameParams.Columns/ 2 - 0.5f;
         float yOffset = (float)GameParams.Rows / 2 - 0.5f;
-        Vector3 middlePos = new Vector3(ScreenWidth / 2, ScreenHeight / 2, 0);
         Vector3 middlePosOffset = new Vector3(ScreenWidth / 2 - xOffset , ScreenHeight / 2 -yOffset, 0);
         
         
@@ -64,21 +62,31 @@ public class GameGrid : MonoBehaviour
             middlePosOffset.x += 1;
         }
     }
+    
+    private static void PickBombTiles()
+    {
+        List<GameObject> bombTiles = new List<GameObject>();
 
-    private void RunAdjacentFinder()
+        for (int i = 0; i < GameParams.BombAmount; i++)
+        {
+            int bomb = Random.Range(0, GameTiles.Count);
+            GameObject bombTile = GameTiles[bomb];
+            bombTile.GetComponent<Tile>().SetBomb();
+            GameTiles.Remove(bombTile);
+            bombTiles.Add(bombTile);
+        }
+
+        foreach (var tile in bombTiles)
+        {
+            GameTiles.Add(tile);
+        }
+    }
+    
+    private static void RunAdjacentFinder()
     {
         foreach (var tile in GameTiles)
         {
             tile.GetComponent<Tile>().DetermineAdjacentBombs();
         }
     }
-
-    private void SetTileTexts()
-    {
-        foreach (var tile in GameTiles)
-        {
-            tile.GetComponent<Tile>().SetTileText();
-        }
-    }
-    
 }
