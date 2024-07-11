@@ -5,9 +5,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
 
 public class GameHUD : MonoBehaviour
 {
+    [SerializeField] private Button digButton;
+    [SerializeField] private Button flagButton;
+    
     [SerializeField] private Canvas gameCanvas;
     [SerializeField] private TextMeshProUGUI remainingBombsText;
     [SerializeField] private TextMeshProUGUI timerText;
@@ -17,28 +22,21 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI newHighScoreText;
     
-    private int _highScore;
-
     private float GameTimer { get; set;}
    
     private void Start()
     {
+        OnDigModeActivated();
         newHighScoreText.gameObject.SetActive(false);
-        SetInitialHighScore();
         GameLogic.GameIsOver += OnGameOver;
+        GameLogic.flagModeActivated += OnFlagModeActivated;
+        GameLogic.digModeActivated += OnDigModeActivated;
+        
         remainingBombsText.text = "Bombs: " + GameParams.BombAmount;
         gameCanvas.gameObject.SetActive(true);
         endCanvas.gameObject.SetActive(false);
     }
-
-    private void SetInitialHighScore()
-    {
-        if (PlayerPrefs.GetInt("_highScore") == 0)
-        {
-            PlayerPrefs.SetInt("_highScore", int.MaxValue);
-        }
-    }
-
+    
     private void Update()
     {
         if (GameLogic.GameHasEnded)
@@ -46,44 +44,58 @@ public class GameHUD : MonoBehaviour
         
         GameTimer += Time.deltaTime;
         timerText.text = "Time: " +(int)GameTimer;
+
+        if (Input.GetKey(KeyCode.R))
+        {
+            PlayerPrefs.DeleteAll();
+            Debug.Log("player prefs wiped");
+        }
+            
     }
 
     private void OnGameOver(bool result)
     {
         GameLogic.GameIsOver -= OnGameOver;
+        GameLogic.flagModeActivated -= OnFlagModeActivated;
+        GameLogic.digModeActivated -= OnDigModeActivated;
+        
         endCanvas.gameObject.SetActive(true);
+        int score = ScoreKeeper.FetchHighScore();
         
         if (result)
         {
-            SetHighScore();
-            scoreText.text = "Highscore: " + _highScore;
+            ScoreKeeper.SetHighScore(GameTimer);
+            score = ScoreKeeper.FetchHighScore();
+            scoreText.text = "HighScore: " + score;
             endMessage.text = "You win, you are cool.";
+            
+            if (ScoreKeeper.HighScoreWasBroken)
+                newHighScoreText.gameObject.SetActive(true);
         }
             
         else
         {
-            _highScore = PlayerPrefs.GetInt("_highScore");
-            if (_highScore == int.MaxValue)
-                _highScore = 0;
             newHighScoreText.gameObject.SetActive(false);
-            scoreText.text = "Highscore: " + _highScore;
+            scoreText.text = "Highscore: " + score;
             endMessage.text = "You lost, everything explodes.";
         }
     }
-
-    private void SetHighScore()
-    {
-        _highScore = PlayerPrefs.GetInt("_highScore");
-        if (GameTimer < _highScore)
-        {
-            PlayerPrefs.SetInt("_highScore", (int)GameTimer);
-            newHighScoreText.gameObject.SetActive(true);
-        }
-        _highScore = PlayerPrefs.GetInt("_highScore");
-    }
+    
     public void PlayAgain()
     {
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.buildIndex);
+    }
+
+    private void OnFlagModeActivated()
+    {
+        flagButton.GetComponent<Button>().image.color = Color.blue;
+        digButton.GetComponent<Button>().image.color = Color.white;
+    }
+
+    private void OnDigModeActivated()
+    {
+        digButton.GetComponent<Button>().image.color = Color.blue;
+        flagButton.GetComponent<Button>().image.color = Color.white;
     }
 }

@@ -7,34 +7,48 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     public static event Action<bool> GameIsOver;
+    public static event Action digModeActivated;
+    public static event Action flagModeActivated; 
+    
     public static bool GameHasEnded { get; set; }
-    public static bool GameWasWon { get; set; }
+    private static bool GameWasWon { get; set; }
+
+    private bool _digModeActive;
     private void Start()
     {
         GameHasEnded = false;
         Tile.TileWasClicked += OnTileWasClicked;
+        _digModeActive = true;
     }
 
     private void OnTileWasClicked(Tile tile)
     {
         if (tile.WasUncovered)
             return;
-        
-        tile.UncoverTile();
-        
-        if (!tile.HasBomb && tile.AdjacentBombAmount == 0)
-            UncoverAllEmpty();
 
-        if (tile.HasBomb)
+        if (_digModeActive)
         {
-            GameWasWon = false;
-            HandleGameEnd(GameWasWon);
+            tile.UncoverTile();
+        
+            if (!tile.HasBomb && tile.AdjacentBombAmount == 0)
+                UncoverAllEmpty();
+
+            if (tile.HasBomb)
+            {
+                GameWasWon = false;
+                HandleGameEnd(GameWasWon);
+            }
+
+            if (CheckGameWon())
+            {
+                GameWasWon = true;
+                HandleGameEnd(GameWasWon);
+            }
         }
 
-        if (CheckGameWon())
+        if (!_digModeActive)
         {
-            GameWasWon = true;
-            HandleGameEnd(GameWasWon);
+            tile.ToggleFlag();
         }
     }
     
@@ -69,5 +83,20 @@ public class GameLogic : MonoBehaviour
             Tile.TileWasClicked -= OnTileWasClicked;
             GameIsOver.Invoke(result);
         }
+    }
+
+    public void DigModeActivate()
+    {
+        _digModeActive = true;
+        if (digModeActivated != null)
+             digModeActivated.Invoke();
+    }
+
+    public void FlagModeActive()
+    {
+        _digModeActive = false;
+        
+        if (flagModeActivated != null) 
+            flagModeActivated.Invoke();
     }
 }

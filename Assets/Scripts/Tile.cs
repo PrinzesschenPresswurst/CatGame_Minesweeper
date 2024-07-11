@@ -9,6 +9,7 @@ public class Tile : MonoBehaviour
     [SerializeField] private Sprite tileFaceCovered;
     [SerializeField] private Sprite tileFaceBare;
     [SerializeField] private Sprite bombSprite;
+    [SerializeField] private Sprite flagSprite;
     
     private SpriteRenderer _spriteRenderer;
     private int _tileRow;
@@ -17,6 +18,8 @@ public class Tile : MonoBehaviour
     public int AdjacentBombAmount { get; private set; }
     private TextMeshPro _tileText;
     public bool WasUncovered { get; private set; }
+
+    private bool _wasFlagged;
     public static event Action<Tile> TileWasClicked;
 
     private void Start()
@@ -92,5 +95,14 @@ public class Tile : MonoBehaviour
             if (tileComponent._tileRow == _tileRow +1 && tileComponent._tileColumn == _tileColumn+1)
                 AdjacentBombAmount++;
         }
+    }
+    
+    public void ToggleFlag()
+    {
+        if (!_wasFlagged)
+            _spriteRenderer.sprite = flagSprite;
+        else _spriteRenderer.sprite = tileFaceCovered;
+        
+        _wasFlagged = !_wasFlagged;
     }
 }
