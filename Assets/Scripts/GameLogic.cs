@@ -1,11 +1,17 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class GameLogic : MonoBehaviour
 {
+    public static event Action<bool> GameIsOver;
+    public static bool GameHasEnded { get; set; }
+    public static bool GameWasWon { get; set; }
     private void Start()
     {
+        GameHasEnded = false;
         Tile.TileWasClicked += OnTileWasClicked;
     }
 
@@ -18,12 +24,18 @@ public class GameLogic : MonoBehaviour
         
         if (!tile.HasBomb && tile.AdjacentBombAmount == 0)
             UncoverAllEmpty();
-        
+
         if (tile.HasBomb)
-            GameLost();
-        
+        {
+            GameWasWon = false;
+            HandleGameEnd(GameWasWon);
+        }
+
         if (CheckGameWon())
-            GameWon();
+        {
+            GameWasWon = true;
+            HandleGameEnd(GameWasWon);
+        }
     }
     
     private void UncoverAllEmpty() // TODO limit to adjacent
@@ -49,13 +61,13 @@ public class GameLogic : MonoBehaviour
         return true;
     }
 
-    private void GameLost()
+    private void HandleGameEnd(bool result)
     {
-        Debug.Log("game over");
-    }
-
-    private void GameWon()
-    {
-        Debug.Log("YOU WIN!");
+        GameHasEnded = true;
+        if (GameIsOver != null)
+        {
+            Tile.TileWasClicked -= OnTileWasClicked;
+            GameIsOver.Invoke(result);
+        }
     }
 }

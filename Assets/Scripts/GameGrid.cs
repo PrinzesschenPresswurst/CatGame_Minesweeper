@@ -13,12 +13,13 @@ public class GameGrid : MonoBehaviour
     private static float ScreenWidth { get; set; }
     private Camera _cam;
 
-    public static readonly List<GameObject> GameTiles = new List<GameObject>();
+    public static List<GameObject> GameTiles;
     
     private int[,] _gameGrid;
 
     private void Start()
     {
+        GameTiles = new List<GameObject>();
         _cam = Camera.main;
         GetScreenSize(); 
         SetCameraPos();

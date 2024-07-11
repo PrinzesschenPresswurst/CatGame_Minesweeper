@@ -27,6 +27,9 @@ public class Tile : MonoBehaviour
 
     private void OnMouseUpAsButton()
     {
+        if (GameLogic.GameHasEnded)
+            return;
+        
         if (TileWasClicked != null)
             TileWasClicked.Invoke(this);
     }
