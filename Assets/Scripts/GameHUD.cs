@@ -21,50 +21,67 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private TextMeshProUGUI endMessage;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI newHighScoreText;
-    
-    private float GameTimer { get; set;}
+
+    private float _gameTimer;
+    private int _setFlagCounter;
    
     private void Start()
     {
-        OnDigModeActivated();
-        newHighScoreText.gameObject.SetActive(false);
         GameLogic.GameIsOver += OnGameOver;
-        GameLogic.flagModeActivated += OnFlagModeActivated;
-        GameLogic.digModeActivated += OnDigModeActivated;
+        GameLogic.FlagModeActivated += OnFlagModeActivated;
+        GameLogic.DigModeActivated += OnDigModeActivated;
+        Tile.FlagWasToggled += OnFlagWasToggled;
+        GameEndSceneHandler.EndFeedbackPlayed += OnEndFeedbackPlayed;
         
-        remainingBombsText.text = "Bombs: " + GameParams.BombAmount;
         gameCanvas.gameObject.SetActive(true);
         endCanvas.gameObject.SetActive(false);
+        newHighScoreText.gameObject.SetActive(false);
+        OnDigModeActivated();
+        SetBombCounter();
     }
     
     private void Update()
     {
+        RunTimer();
+    }
+
+    private void RunTimer()
+    {
         if (GameLogic.GameHasEnded)
             return;
         
-        GameTimer += Time.deltaTime;
-        timerText.text = "Time: " +(int)GameTimer;
-
-        if (Input.GetKey(KeyCode.R))
-        {
-            PlayerPrefs.DeleteAll();
-            Debug.Log("player prefs wiped");
-        }
-            
+        _gameTimer += Time.deltaTime;
+        timerText.text = "Time: " +(int)_gameTimer;
     }
 
+    private void OnFlagWasToggled(int count)
+    {
+        _setFlagCounter += count;
+        SetBombCounter();
+    }
+
+    private void SetBombCounter()
+    {
+        remainingBombsText.text = "Flags: " + (GameParams.BombAmount - _setFlagCounter) + " / " + GameParams.BombAmount;
+        
+        if (_setFlagCounter > GameParams.BombAmount)
+            remainingBombsText.color = Color.red;
+        else remainingBombsText.color = Color.white;
+    }
+    
+    
     private void OnGameOver(bool result)
     {
         GameLogic.GameIsOver -= OnGameOver;
-        GameLogic.flagModeActivated -= OnFlagModeActivated;
-        GameLogic.digModeActivated -= OnDigModeActivated;
+        GameLogic.FlagModeActivated -= OnFlagModeActivated;
+        GameLogic.DigModeActivated -= OnDigModeActivated;
+        Tile.FlagWasToggled -= OnFlagWasToggled; 
         
-        endCanvas.gameObject.SetActive(true);
         int score = ScoreKeeper.FetchHighScore();
         
         if (result)
         {
-            ScoreKeeper.SetHighScore(GameTimer);
+            ScoreKeeper.SetHighScore(_gameTimer);
             score = ScoreKeeper.FetchHighScore();
             scoreText.text = "HighScore: " + score;
             endMessage.text = "You win, you are cool.";
@@ -80,11 +97,11 @@ public class GameHUD : MonoBehaviour
             endMessage.text = "You lost, everything explodes.";
         }
     }
-    
-    public void PlayAgain()
+
+    private void OnEndFeedbackPlayed()
     {
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(currentScene.buildIndex);
+        endCanvas.gameObject.SetActive(true);
+        GameEndSceneHandler.EndFeedbackPlayed -= OnEndFeedbackPlayed;
     }
 
     private void OnFlagModeActivated()
@@ -97,5 +114,11 @@ public class GameHUD : MonoBehaviour
     {
         digButton.GetComponent<Button>().image.color = Color.blue;
         flagButton.GetComponent<Button>().image.color = Color.white;
+    }
+    
+    public void PlayAgain()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.buildIndex);
     }
 }

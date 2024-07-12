@@ -7,13 +7,14 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     public static event Action<bool> GameIsOver;
-    public static event Action digModeActivated;
-    public static event Action flagModeActivated; 
+    public static event Action DigModeActivated;
+    public static event Action FlagModeActivated; 
     
-    public static bool GameHasEnded { get; set; }
-    private static bool GameWasWon { get; set; }
-
+    public static bool GameHasEnded { get; private set; }
+    private static bool _gameWasWon;
     private bool _digModeActive;
+    
+    
     private void Start()
     {
         GameHasEnded = false;
@@ -31,18 +32,18 @@ public class GameLogic : MonoBehaviour
             tile.UncoverTile();
         
             if (!tile.HasBomb && tile.AdjacentBombAmount == 0)
-                UncoverAllEmpty();
+                UncoverAllEmpty(tile);
 
             if (tile.HasBomb)
             {
-                GameWasWon = false;
-                HandleGameEnd(GameWasWon);
+                _gameWasWon = false;
+                HandleGameEnd(_gameWasWon);
             }
 
             if (CheckGameWon())
             {
-                GameWasWon = true;
-                HandleGameEnd(GameWasWon);
+                _gameWasWon = true;
+                HandleGameEnd(_gameWasWon);
             }
         }
 
@@ -52,16 +53,9 @@ public class GameLogic : MonoBehaviour
         }
     }
     
-    private void UncoverAllEmpty() // TODO limit to adjacent
+    private void UncoverAllEmpty(Tile rootTile) 
     {
-        foreach (var tile in GameGrid.GameTiles)
-        {
-            Tile tileComponent = tile.GetComponent<Tile>();
-            if (!tileComponent.HasBomb && tileComponent.AdjacentBombAmount == 0)
-            {
-                tileComponent.UncoverTile();
-            }
-        }
+        rootTile.UncoverNeighbours();
     }
 
     private bool CheckGameWon()
@@ -88,15 +82,15 @@ public class GameLogic : MonoBehaviour
     public void DigModeActivate()
     {
         _digModeActive = true;
-        if (digModeActivated != null)
-             digModeActivated.Invoke();
+        if (DigModeActivated != null)
+             DigModeActivated.Invoke();
     }
 
     public void FlagModeActive()
     {
         _digModeActive = false;
         
-        if (flagModeActivated != null) 
-            flagModeActivated.Invoke();
+        if (FlagModeActivated != null) 
+            FlagModeActivated.Invoke();
     }
 }

@@ -86,7 +86,9 @@ public class GameGrid : MonoBehaviour
     {
         foreach (var tile in GameTiles)
         {
-            tile.GetComponent<Tile>().DetermineAdjacentBombs();
+            Tile tileComponent = tile.GetComponent<Tile>();
+            tileComponent.DetermineNeighbors();
+            tileComponent.CountBombsInNeighbours();
         }
     }
 }

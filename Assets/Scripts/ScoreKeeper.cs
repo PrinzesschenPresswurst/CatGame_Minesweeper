@@ -13,6 +13,19 @@ public class ScoreKeeper : MonoBehaviour
         SetInitialHighScore();
     }
 
+    private void Update()
+    {
+        ListenForResetHighScoreCheat();
+    }
+    
+    private static void ListenForResetHighScoreCheat()
+    {
+        if (Input.GetKey(KeyCode.R))
+        {
+            PlayerPrefs.DeleteAll();
+        }
+    }
+
     private void SetInitialHighScore()
     {
         if (PlayerPrefs.GetInt("_highScore") == 0)
