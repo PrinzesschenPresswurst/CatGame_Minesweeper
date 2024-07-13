@@ -35,7 +35,7 @@ public class GameHUD : MonoBehaviour
         
         gameCanvas.gameObject.SetActive(true);
         endCanvas.gameObject.SetActive(false);
-        newHighScoreText.gameObject.SetActive(false);
+        //newHighScoreText.gameObject.SetActive(false);
         OnDigModeActivated();
         SetBombCounter();
     }
@@ -51,7 +51,7 @@ public class GameHUD : MonoBehaviour
             return;
         
         _gameTimer += Time.deltaTime;
-        timerText.text = "Time: " +(int)_gameTimer;
+        timerText.text = " " +(int)_gameTimer;
     }
 
     private void OnFlagWasToggled(int count)
@@ -62,11 +62,11 @@ public class GameHUD : MonoBehaviour
 
     private void SetBombCounter()
     {
-        remainingBombsText.text = "Flags: " + (GameParams.BombAmount - _setFlagCounter) + " / " + GameParams.BombAmount;
-        
+        remainingBombsText.text = " " + (GameParams.BombAmount - _setFlagCounter);
+
         if (_setFlagCounter > GameParams.BombAmount)
             remainingBombsText.color = Color.red;
-        else remainingBombsText.color = Color.white;
+        else remainingBombsText.color = Color.black;
     }
     
     
@@ -83,18 +83,18 @@ public class GameHUD : MonoBehaviour
         {
             ScoreKeeper.SetHighScore(_gameTimer);
             score = ScoreKeeper.FetchHighScore();
-            scoreText.text = "HighScore: " + score;
+            scoreText.text = "" + score;
             endMessage.text = "You win, you are cool.";
-            
+
             if (ScoreKeeper.HighScoreWasBroken)
-                newHighScoreText.gameObject.SetActive(true);
+                newHighScoreText.text = "New HighScore!";
         }
             
         else
         {
-            newHighScoreText.gameObject.SetActive(false);
-            scoreText.text = "Highscore: " + score;
-            endMessage.text = "You lost, everything explodes.";
+            newHighScoreText.text = "";
+            scoreText.text =  "You lost";
+            endMessage.text ="old highscore: " + score;
         }
     }
 
@@ -120,5 +120,10 @@ public class GameHUD : MonoBehaviour
     {
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.buildIndex);
+    }
+    public void LoadMenu()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(0);
     }
 }

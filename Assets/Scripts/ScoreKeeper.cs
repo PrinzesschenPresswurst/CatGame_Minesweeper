@@ -23,6 +23,7 @@ public class ScoreKeeper : MonoBehaviour
         if (Input.GetKey(KeyCode.R))
         {
             PlayerPrefs.DeleteAll();
+            Debug.Log("playerprefs reset");
         }
     }
 
