@@ -21,6 +21,7 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private TextMeshProUGUI endMessage;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI newHighScoreText;
+    [SerializeField] private TextMeshProUGUI gameTypeText;
 
     private float _gameTimer;
     private int _setFlagCounter;
@@ -32,10 +33,9 @@ public class GameHUD : MonoBehaviour
         GameLogic.DigModeActivated += OnDigModeActivated;
         Tile.FlagWasToggled += OnFlagWasToggled;
         GameEndSceneHandler.EndFeedbackPlayed += OnEndFeedbackPlayed;
-        
+        gameTypeText.text = GameParams.SelectedGameSize.ToString();
         gameCanvas.gameObject.SetActive(true);
         endCanvas.gameObject.SetActive(false);
-        //newHighScoreText.gameObject.SetActive(false);
         OnDigModeActivated();
         SetBombCounter();
     }

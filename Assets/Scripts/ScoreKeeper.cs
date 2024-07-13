@@ -29,15 +29,15 @@ public class ScoreKeeper : MonoBehaviour
 
     private void SetInitialHighScore()
     {
-        if (PlayerPrefs.GetInt("_highScore") == 0)
+        if (PlayerPrefs.GetInt( GameParams.SelectedGameSize.ToString()) == 0)
         {
-            PlayerPrefs.SetInt("_highScore", int.MaxValue);
+            PlayerPrefs.SetInt(GameParams.SelectedGameSize.ToString(), int.MaxValue);
         }
     }
     
     public static int FetchHighScore()
     {
-        HighScore = PlayerPrefs.GetInt("_highScore");
+        HighScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
         if (HighScore == int.MaxValue)
             HighScore = 0;
         return HighScore;
@@ -45,13 +45,13 @@ public class ScoreKeeper : MonoBehaviour
 
     public static void SetHighScore(float gameTimer)
     {
-        HighScore = PlayerPrefs.GetInt("_highScore");
+        HighScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
         HighScoreWasBroken = false;
         if (gameTimer < HighScore)
         {
-            PlayerPrefs.SetInt("_highScore", (int)gameTimer);
+            PlayerPrefs.SetInt(GameParams.SelectedGameSize.ToString(), (int)gameTimer);
             HighScoreWasBroken = true;
         }
-        HighScore = PlayerPrefs.GetInt("_highScore");
+        HighScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
     }
 }

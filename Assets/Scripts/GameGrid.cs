@@ -11,6 +11,7 @@ public class GameGrid : MonoBehaviour
     private static float ScreenHeight { get; set; }
     private static float ScreenWidth { get; set; }
     private Camera _cam;
+    private float _tileAssetScale;
 
     public static List<GameObject> GameTiles;
     
@@ -18,6 +19,7 @@ public class GameGrid : MonoBehaviour
 
     private void Start()
     {
+        _tileAssetScale = 1f;
         GameTiles = new List<GameObject>();
         _cam = Camera.main;
         GetScreenSize(); 
@@ -41,10 +43,10 @@ public class GameGrid : MonoBehaviour
     private void DrawGrid()
     {
         _gameGrid = new int[GameParams.Columns,GameParams.Rows];
-        
-        float xOffset = (float)GameParams.Columns/ 2 - 0.5f;
-        float yOffset = (float)GameParams.Rows / 2 - 0.5f;
-        Vector3 middlePosOffset = new Vector3(ScreenWidth / 2 - xOffset , ScreenHeight / 2 -yOffset, 0);
+        _tileAssetScale = CheckIfFitsScreen() ;
+        float xOffset = (GameParams.Columns/ 2f - (_tileAssetScale/2))*_tileAssetScale;
+        float yOffset = (GameParams.Rows / 2f - (_tileAssetScale/2)) * _tileAssetScale;
+        Vector3 middlePosOffset = new Vector3(ScreenWidth / 2f - xOffset , ScreenHeight / 2f -yOffset, 0);
         
         
         for (int columns = 0; columns < _gameGrid.GetLength(0); columns++)
@@ -52,15 +54,37 @@ public class GameGrid : MonoBehaviour
             for (int rows = 0; rows < _gameGrid.GetLength(1); rows++)
             {
                 GameObject currentTile = Instantiate(tileAsset, middlePosOffset, quaternion.identity);
+                currentTile.transform.localScale = new Vector3(_tileAssetScale- 0.1f, _tileAssetScale- 0.1f, 1);
                 GameTiles.Add(currentTile);
                 currentTile.GetComponent<Tile>().SetPosition(rows, columns);
                 
-                middlePosOffset.y += 1;
+                middlePosOffset.y += _tileAssetScale;
             }
             
             middlePosOffset.y  = ScreenHeight / 2 - yOffset ;
-            middlePosOffset.x += 1;
+            middlePosOffset.x += _tileAssetScale;
         }
+    }
+
+    private float CheckIfFitsScreen()
+    { 
+        float uiBuffer = 2f *2; 
+        float actualScreenSize = ScreenHeight - uiBuffer;
+
+        float allTiles = GameParams.Rows * _tileAssetScale;
+        
+
+        Debug.Log("actual size: "+ actualScreenSize);
+        Debug.Log("all tiles size: "+ allTiles);
+        
+        while (actualScreenSize <= allTiles)
+        {
+            _tileAssetScale = _tileAssetScale - 0.01f;
+            allTiles = GameParams.Rows * _tileAssetScale;
+            Debug.Log("doesnt fit, needs scale " + _tileAssetScale);
+        }
+
+        return _tileAssetScale;
     }
     
     private static void PickBombTiles()
