@@ -25,6 +25,10 @@ public class Tile : MonoBehaviour
     private bool _wasFlagged;
     public static event Action<Tile> TileWasClicked;
     public static event Action<int> FlagWasToggled;
+    public static event Action<Tile> BombUncovered;
+    public static event Action<Tile> GreenFlagSet;
+    public static event Action<Tile> FlagSet;
+    public static event Action<Tile> TileUncovered;
 
     private void Start()
     {
@@ -47,12 +51,16 @@ public class Tile : MonoBehaviour
     {
         _spriteRenderer.sprite = tileFaceBare;
         WasUncovered = true;
+        if (TileUncovered != null)
+            TileUncovered.Invoke(this);
         
         if (HasBomb)
         {
             _tileText.text = " ";
             _spriteRenderer.sprite = bombSprite;
-            _bombParticle.Play();
+            if (BombUncovered != null)
+                BombUncovered.Invoke(this);
+            _bombParticle.Play(); // TODO get this out to a generic system
         }
             
         else if (AdjacentBombAmount == 0)
@@ -110,6 +118,8 @@ public class Tile : MonoBehaviour
         if (!_wasFlagged)
         {
             _spriteRenderer.sprite = flagSprite;
+            if (FlagSet != null)
+                FlagSet.Invoke(this);
             
             if (FlagWasToggled != null)
                 FlagWasToggled(1);
@@ -127,6 +137,8 @@ public class Tile : MonoBehaviour
     public void SetGreenFlag()
     {
         _spriteRenderer.sprite = flagSpriteWon;
+        if (GreenFlagSet != null)
+            GreenFlagSet.Invoke(this);
     }
 
     public void UncoverNeighbours()

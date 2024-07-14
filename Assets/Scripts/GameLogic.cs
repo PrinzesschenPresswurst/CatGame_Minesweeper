@@ -13,8 +13,8 @@ public class GameLogic : MonoBehaviour
     public static bool GameHasEnded { get; private set; }
     public static float GameTimer { get; private set; }
     
-    private static bool _gameWasWon;
-    private bool _digModeActive;
+    public static bool GameWasWon { get; private set; }
+    public static bool DigModeActive { get; private set; }
     
     private void Start()
     {
@@ -22,7 +22,7 @@ public class GameLogic : MonoBehaviour
         
         GameTimer = 0;
         GameHasEnded = false;
-        _digModeActive = true;
+        DigModeActive = true;
     }
 
     private void Update()
@@ -43,7 +43,7 @@ public class GameLogic : MonoBehaviour
         if (tile.WasUncovered)
             return;
 
-        if (_digModeActive)
+        if (DigModeActive)
         {
             tile.UncoverTile();
         
@@ -52,18 +52,18 @@ public class GameLogic : MonoBehaviour
 
             if (tile.HasBomb)
             {
-                _gameWasWon = false;
-                HandleGameEnd(_gameWasWon);
+                GameWasWon = false;
+                HandleGameEnd(GameWasWon);
             }
 
             if (CheckGameWon())
             {
-                _gameWasWon = true;
-                HandleGameEnd(_gameWasWon);
+                GameWasWon = true;
+                HandleGameEnd(GameWasWon);
             }
         }
 
-        if (!_digModeActive)
+        if (!DigModeActive)
         {
             tile.ToggleFlag();
         }
@@ -76,15 +76,14 @@ public class GameLogic : MonoBehaviour
     
     public void DigModeActivate()
     {
-        _digModeActive = true;
+        DigModeActive = true;
         if (DigModeActivated != null)
              DigModeActivated.Invoke();
     }
 
     public void FlagModeActive()
     {
-        _digModeActive = false;
-        
+        DigModeActive = false;
         if (FlagModeActivated != null) 
             FlagModeActivated.Invoke();
     }

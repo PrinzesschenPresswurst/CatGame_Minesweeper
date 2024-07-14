@@ -3135,6 +3135,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileSound: {fileID: 8300000, guid: 52e3f3b2b495eb14ab2b10c0c62d3855, type: 3}
+  bombSound: {fileID: 8300000, guid: ea2b1479f37407c4b914598d3d9c5b78, type: 3}
+  greenFlagSound: {fileID: 8300000, guid: 52e3f3b2b495eb14ab2b10c0c62d3855, type: 3}
+  setFlagSound: {fileID: 8300000, guid: 31a1000c25c51b540ab1ff91dbc30292, type: 3}
+  winSound: {fileID: 8300000, guid: bebe5d15b8c135346ba7831639d558f6, type: 3}
+  loseSound: {fileID: 8300000, guid: ff13652406cee9841b8517e100e3d075, type: 3}
 --- !u!1 &1865147064
 GameObject:
   m_ObjectHideFlags: 0
