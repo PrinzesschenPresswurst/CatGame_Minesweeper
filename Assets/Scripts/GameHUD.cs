@@ -17,6 +17,7 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private TextMeshProUGUI remainingBombsText;
     [SerializeField] private TextMeshProUGUI timerText;
     
+    // TODO split the popup stuff to own class
     [SerializeField] private Canvas endCanvas;
     [SerializeField] private TextMeshProUGUI endMessage;
     [SerializeField] private TextMeshProUGUI scoreText;
@@ -33,6 +34,8 @@ public class GameHUD : MonoBehaviour
         GameLogic.DigModeActivated += OnDigModeActivated;
         Tile.FlagWasToggled += OnFlagWasToggled;
         GameEndSceneHandler.EndFeedbackPlayed += OnEndFeedbackPlayed;
+        
+        _gameTimer = 0;
         gameTypeText.text = GameParams.SelectedGameSize.ToString();
         gameCanvas.gameObject.SetActive(true);
         endCanvas.gameObject.SetActive(false);
@@ -51,7 +54,18 @@ public class GameHUD : MonoBehaviour
             return;
         
         _gameTimer += Time.deltaTime;
-        timerText.text = " " +(int)_gameTimer;
+        timerText.text = DisplayMinutes((int)_gameTimer);
+    }
+
+    private string DisplayMinutes(int whatToDisplay)
+    {
+        int minutes = whatToDisplay / 60;
+        int seconds = whatToDisplay % 60; 
+        
+        if (seconds < 10)
+            return timerText.text = "" + minutes + ":0" + seconds;
+        
+        return timerText.text = "" + minutes + ":" + seconds;
     }
 
     private void OnFlagWasToggled(int count)
@@ -83,7 +97,7 @@ public class GameHUD : MonoBehaviour
         {
             ScoreKeeper.SetHighScore(_gameTimer);
             score = ScoreKeeper.FetchHighScore();
-            scoreText.text = "" + score;
+            scoreText.text = "" + DisplayMinutes(score);;
             endMessage.text = "You win, you are cool.";
 
             if (ScoreKeeper.HighScoreWasBroken)
@@ -94,7 +108,8 @@ public class GameHUD : MonoBehaviour
         {
             newHighScoreText.text = "";
             scoreText.text =  "You lost";
-            endMessage.text ="old highscore: " + score;
+            endMessage.text ="old highscore: " + DisplayMinutes(score);
+            timerText.text = DisplayMinutes((int)_gameTimer);
         }
     }
 
