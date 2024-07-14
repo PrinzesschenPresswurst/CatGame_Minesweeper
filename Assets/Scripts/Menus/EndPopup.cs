@@ -23,12 +23,12 @@ public class EndPopup : MonoBehaviour
     {
         GameLogic.GameIsOver -= OnGameOver;
         
-        int score = ScoreKeeper.FetchHighScore();
+        int score = ScoreKeeper.FetchHighScore(GameParams.SelectedGameSize);
         
         if (result)
         {
             ScoreKeeper.SetHighScore(GameLogic.GameTimer);
-            score = ScoreKeeper.FetchHighScore();
+            score = ScoreKeeper.FetchHighScore(GameParams.SelectedGameSize);
             scoreText.text = "" + GameHUD.DisplayMinutes(score);;
             endMessage.text = "You win, you are cool.";
 

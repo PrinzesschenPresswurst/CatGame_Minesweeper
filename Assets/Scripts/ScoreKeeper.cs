@@ -35,9 +35,9 @@ public class ScoreKeeper : MonoBehaviour
         }
     }
     
-    public static int FetchHighScore()
+    public static int FetchHighScore(GameParams.GameSize gameSize)
     {
-        _highScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
+        _highScore = PlayerPrefs.GetInt(gameSize.ToString());
         if (_highScore == int.MaxValue)
             _highScore = 0;
         return _highScore;
