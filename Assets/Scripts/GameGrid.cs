@@ -8,15 +8,15 @@ using Random = UnityEngine.Random;
 public class GameGrid : MonoBehaviour
 {
     [SerializeField] private GameObject tileAsset;
-    private static float ScreenHeight { get; set; }
-    private static float ScreenWidth { get; set; }
+    
+    private static float _screenHeight;
+    private static float _screenWidth;
     private Camera _cam;
     private float _tileAssetScale;
-
-    public static List<GameObject> GameTiles;
-    
     private int[,] _gameGrid;
 
+    public static List<GameObject> GameTiles { get; private set; }
+    
     private void Start()
     {
         _tileAssetScale = 1f;
@@ -31,13 +31,13 @@ public class GameGrid : MonoBehaviour
 
     private void GetScreenSize()
     {
-        ScreenHeight= _cam.orthographicSize *2;
-        ScreenWidth = ScreenHeight * _cam.aspect;
+        _screenHeight= _cam.orthographicSize *2;
+        _screenWidth = _screenHeight * _cam.aspect;
     }
 
     private void SetCameraPos()
     {
-        _cam.transform.position = new Vector3(GameGrid.ScreenWidth/2, GameGrid.ScreenHeight/2, -10);
+        _cam.transform.position = new Vector3(GameGrid._screenWidth/2, GameGrid._screenHeight/2, -10);
     }
     
     private void DrawGrid()
@@ -46,7 +46,7 @@ public class GameGrid : MonoBehaviour
         _tileAssetScale = CheckIfFitsScreen() ;
         float xOffset = (GameParams.Columns/ 2f - (_tileAssetScale/2))*_tileAssetScale;
         float yOffset = (GameParams.Rows / 2f - (_tileAssetScale/2)) * _tileAssetScale;
-        Vector3 middlePosOffset = new Vector3(ScreenWidth / 2f - xOffset , ScreenHeight / 2f -yOffset, 0);
+        Vector3 middlePosOffset = new Vector3(_screenWidth / 2f - xOffset , _screenHeight / 2f -yOffset, 0);
         
         
         for (int columns = 0; columns < _gameGrid.GetLength(0); columns++)
@@ -61,7 +61,7 @@ public class GameGrid : MonoBehaviour
                 middlePosOffset.y += _tileAssetScale;
             }
             
-            middlePosOffset.y  = ScreenHeight / 2 - yOffset ;
+            middlePosOffset.y  = _screenHeight / 2 - yOffset ;
             middlePosOffset.x += _tileAssetScale;
         }
     }
@@ -69,19 +69,13 @@ public class GameGrid : MonoBehaviour
     private float CheckIfFitsScreen()
     { 
         float uiBuffer = 2f *2; 
-        float actualScreenSize = ScreenHeight - uiBuffer;
-
+        float actualScreenSize = _screenHeight - uiBuffer;
         float allTiles = GameParams.Rows * _tileAssetScale;
-        
-
-        Debug.Log("actual size: "+ actualScreenSize);
-        Debug.Log("all tiles size: "+ allTiles);
         
         while (actualScreenSize <= allTiles)
         {
             _tileAssetScale = _tileAssetScale - 0.01f;
             allTiles = GameParams.Rows * _tileAssetScale;
-            Debug.Log("doesnt fit, needs scale " + _tileAssetScale);
         }
 
         return _tileAssetScale;

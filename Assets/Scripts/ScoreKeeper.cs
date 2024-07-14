@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class ScoreKeeper : MonoBehaviour
 {
-    public static int HighScore { get; set; }
-    public static bool HighScoreWasBroken { get; set; }
+    private static int _highScore;
+    public static bool HighScoreWasBroken { get; private set; }
 
     private void Start()
     {
@@ -27,7 +27,7 @@ public class ScoreKeeper : MonoBehaviour
         }
     }
 
-    private void SetInitialHighScore()
+    private static void SetInitialHighScore()
     {
         if (PlayerPrefs.GetInt( GameParams.SelectedGameSize.ToString()) == 0)
         {
@@ -37,21 +37,21 @@ public class ScoreKeeper : MonoBehaviour
     
     public static int FetchHighScore()
     {
-        HighScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
-        if (HighScore == int.MaxValue)
-            HighScore = 0;
-        return HighScore;
+        _highScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
+        if (_highScore == int.MaxValue)
+            _highScore = 0;
+        return _highScore;
     }
 
     public static void SetHighScore(float gameTimer)
     {
-        HighScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
+        _highScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
         HighScoreWasBroken = false;
-        if (gameTimer < HighScore)
+        if (gameTimer < _highScore)
         {
             PlayerPrefs.SetInt(GameParams.SelectedGameSize.ToString(), (int)gameTimer);
             HighScoreWasBroken = true;
         }
-        HighScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
+        _highScore = PlayerPrefs.GetInt(GameParams.SelectedGameSize.ToString());
     }
 }

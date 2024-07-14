@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
@@ -16,15 +15,9 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private Canvas gameCanvas;
     [SerializeField] private TextMeshProUGUI remainingBombsText;
     [SerializeField] private TextMeshProUGUI timerText;
-    
-    // TODO split the popup stuff to own class
     [SerializeField] private Canvas endCanvas;
-    [SerializeField] private TextMeshProUGUI endMessage;
-    [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private TextMeshProUGUI newHighScoreText;
-    [SerializeField] private TextMeshProUGUI gameTypeText;
-
-    private float _gameTimer;
+    
+    
     private int _setFlagCounter;
    
     private void Start()
@@ -35,8 +28,6 @@ public class GameHUD : MonoBehaviour
         Tile.FlagWasToggled += OnFlagWasToggled;
         GameEndSceneHandler.EndFeedbackPlayed += OnEndFeedbackPlayed;
         
-        _gameTimer = 0;
-        gameTypeText.text = GameParams.SelectedGameSize.ToString();
         gameCanvas.gameObject.SetActive(true);
         endCanvas.gameObject.SetActive(false);
         OnDigModeActivated();
@@ -45,27 +36,18 @@ public class GameHUD : MonoBehaviour
     
     private void Update()
     {
-        RunTimer();
+        timerText.text = DisplayMinutes((int)GameLogic.GameTimer);
     }
-
-    private void RunTimer()
-    {
-        if (GameLogic.GameHasEnded)
-            return;
-        
-        _gameTimer += Time.deltaTime;
-        timerText.text = DisplayMinutes((int)_gameTimer);
-    }
-
-    private string DisplayMinutes(int whatToDisplay)
+    
+    public static string DisplayMinutes(int whatToDisplay)
     {
         int minutes = whatToDisplay / 60;
         int seconds = whatToDisplay % 60; 
         
         if (seconds < 10)
-            return timerText.text = "" + minutes + ":0" + seconds;
+            return  "" + minutes + ":0" + seconds;
         
-        return timerText.text = "" + minutes + ":" + seconds;
+        return  "" + minutes + ":" + seconds;
     }
 
     private void OnFlagWasToggled(int count)
@@ -81,36 +63,6 @@ public class GameHUD : MonoBehaviour
         if (_setFlagCounter > GameParams.BombAmount)
             remainingBombsText.color = Color.red;
         else remainingBombsText.color = Color.black;
-    }
-    
-    
-    private void OnGameOver(bool result)
-    {
-        GameLogic.GameIsOver -= OnGameOver;
-        GameLogic.FlagModeActivated -= OnFlagModeActivated;
-        GameLogic.DigModeActivated -= OnDigModeActivated;
-        Tile.FlagWasToggled -= OnFlagWasToggled; 
-        
-        int score = ScoreKeeper.FetchHighScore();
-        
-        if (result)
-        {
-            ScoreKeeper.SetHighScore(_gameTimer);
-            score = ScoreKeeper.FetchHighScore();
-            scoreText.text = "" + DisplayMinutes(score);;
-            endMessage.text = "You win, you are cool.";
-
-            if (ScoreKeeper.HighScoreWasBroken)
-                newHighScoreText.text = "New HighScore!";
-        }
-            
-        else
-        {
-            newHighScoreText.text = "";
-            scoreText.text =  "You lost";
-            endMessage.text ="old highscore: " + DisplayMinutes(score);
-            timerText.text = DisplayMinutes((int)_gameTimer);
-        }
     }
 
     private void OnEndFeedbackPlayed()
@@ -131,14 +83,13 @@ public class GameHUD : MonoBehaviour
         flagButton.GetComponent<Button>().image.color = Color.white;
     }
     
-    public void PlayAgain()
+    private void OnGameOver(bool result)
     {
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(currentScene.buildIndex);
-    }
-    public void LoadMenu()
-    {
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(0);
+        GameLogic.GameIsOver -= OnGameOver;
+        GameLogic.FlagModeActivated -= OnFlagModeActivated;
+        GameLogic.DigModeActivated -= OnDigModeActivated;
+        Tile.FlagWasToggled -= OnFlagWasToggled; 
+        
+        timerText.text = DisplayMinutes((int)GameLogic.GameTimer);
     }
 }

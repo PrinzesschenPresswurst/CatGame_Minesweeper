@@ -11,15 +11,31 @@ public class GameLogic : MonoBehaviour
     public static event Action FlagModeActivated; 
     
     public static bool GameHasEnded { get; private set; }
+    public static float GameTimer { get; private set; }
+    
     private static bool _gameWasWon;
     private bool _digModeActive;
     
-    
     private void Start()
     {
-        GameHasEnded = false;
         Tile.TileWasClicked += OnTileWasClicked;
+        
+        GameTimer = 0;
+        GameHasEnded = false;
         _digModeActive = true;
+    }
+
+    private void Update()
+    {
+        RunTimer();
+    }
+    
+    private void RunTimer()
+    {
+        if (GameHasEnded)
+            return;
+        
+        GameTimer += Time.deltaTime;
     }
 
     private void OnTileWasClicked(Tile tile)
@@ -57,28 +73,7 @@ public class GameLogic : MonoBehaviour
     {
         rootTile.UncoverNeighbours();
     }
-
-    private bool CheckGameWon()
-    {
-        foreach (var tile in GameGrid.GameTiles)
-        {
-            Tile tileComponent = tile.GetComponent<Tile>();
-            if (!tileComponent.HasBomb && !tileComponent.WasUncovered)
-                return false;
-        }
-        return true;
-    }
-
-    private void HandleGameEnd(bool result)
-    {
-        GameHasEnded = true;
-        if (GameIsOver != null)
-        {
-            Tile.TileWasClicked -= OnTileWasClicked;
-            GameIsOver.Invoke(result);
-        }
-    }
-
+    
     public void DigModeActivate()
     {
         _digModeActive = true;
@@ -92,5 +87,26 @@ public class GameLogic : MonoBehaviour
         
         if (FlagModeActivated != null) 
             FlagModeActivated.Invoke();
+    }
+    
+    private bool CheckGameWon()
+    {
+        foreach (var tile in GameGrid.GameTiles)
+        {
+            Tile tileComponent = tile.GetComponent<Tile>();
+            if (!tileComponent.HasBomb && !tileComponent.WasUncovered)
+                return false;
+        }
+        return true;
+    }
+    
+    private void HandleGameEnd(bool result)
+    {
+        GameHasEnded = true;
+        if (GameIsOver != null)
+        {
+            Tile.TileWasClicked -= OnTileWasClicked;
+            GameIsOver.Invoke(result);
+        }
     }
 }
